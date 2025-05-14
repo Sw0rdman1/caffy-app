@@ -3,12 +3,34 @@ import ParallaxScrollView, { HEADER_HEIGHT } from '@/components/ParallaxScrollVi
 import { Text } from '@/components/Themed';
 import { useColors } from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
-import { Dimensions, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Alert, Dimensions, StyleSheet, TouchableOpacity, View } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import { getCameraPermissionsAsync } from '@/utils/camera';
+import { router } from 'expo-router';
+import { useAppContext } from '@/context/AppContext';
 
 const { height } = Dimensions.get('window');
 
 export default function HomeScreen() {
     const { backgroundPrimary, backgroundSecondary, textSecondary, highlight } = useColors();
+    const { setImageUri } = useAppContext();
+
+    const pickImage = async () => {
+        await getCameraPermissionsAsync()
+
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ['images', 'livePhotos'],
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 1,
+        });
+
+        if (!result.canceled) {
+            setImageUri(result.assets[0].uri);
+            router.push('/preview');
+        }
+    };
+
 
     return (
         <ParallaxScrollView
@@ -25,7 +47,10 @@ export default function HomeScreen() {
                 <Text style={{ ...styles.subtitle, color: textSecondary }}>
                     Track your coffee journey.
                 </Text>
-                <TouchableOpacity style={{ ...styles.buttonContainer, backgroundColor: backgroundPrimary }}>
+                <TouchableOpacity
+                    onPress={pickImage}
+                    style={{ ...styles.buttonContainer, backgroundColor: backgroundPrimary }}
+                >
                     <Ionicons name='camera' size={62} color={highlight} />
                     <Text style={{ ...styles.buttonText, color: highlight }}>
                         Snap your daily brew

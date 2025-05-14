@@ -5,6 +5,7 @@ import 'react-native-reanimated';
 
 import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from 'react-native';
+import { AppProvider } from '@/context/AppContext';
 
 export {
   ErrorBoundary,
@@ -27,12 +28,15 @@ export default function RootLayout() {
 
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-      </Stack>
-      <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
-    </ThemeProvider>
+    <AppProvider>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <Stack>
+          <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="preview" options={{ headerShown: false }} />
+        </Stack>
+        <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
+      </ThemeProvider>
+    </AppProvider>
   );
 }
 
