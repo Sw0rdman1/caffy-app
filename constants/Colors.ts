@@ -1,3 +1,5 @@
+import { useColorScheme } from "react-native";
+
 const CaffyColors = {
   light: {
     // Backgrounds
@@ -37,3 +39,8 @@ const CaffyColors = {
 };
 
 export default CaffyColors;
+
+export const useColors = () => {
+  const colorScheme = useColorScheme() ?? 'light';
+  return CaffyColors[colorScheme];
+}
