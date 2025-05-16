@@ -1,25 +1,24 @@
 import React from 'react';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { Link, Tabs } from 'expo-router';
-import { Pressable, useColorScheme } from 'react-native';
+import { Tabs } from 'expo-router';
+import { useColors } from '@/constants/Colors';
+import { Ionicons } from '@expo/vector-icons';
 
-import Colors, { useColors } from '@/constants/Colors';
-
-// You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
 function TabBarIcon(props: {
-    name: React.ComponentProps<typeof FontAwesome>['name'];
+    name: React.ComponentProps<typeof Ionicons>['name'];
     color: string;
 }) {
-    return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
+    return <Ionicons size={28} style={{ marginBottom: 0 }} {...props} />;
 }
 
 export default function TabLayout() {
-    const { highlight, backgroundPrimary } = useColors();
+    const { highlight, backgroundPrimary, textMuted } = useColors();
 
     return (
         <Tabs
             screenOptions={{
                 tabBarActiveTintColor: highlight,
+                tabBarInactiveTintColor: textMuted,
                 tabBarStyle: {
                     backgroundColor: backgroundPrimary
                 },
@@ -28,14 +27,15 @@ export default function TabLayout() {
                 name="index"
                 options={{
                     headerShown: false,
-                    tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+                    title: 'Home',
+                    tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
                 }}
             />
             <Tabs.Screen
-                name="two"
+                name="history"
                 options={{
-                    title: 'Tab Two',
-                    tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+                    title: 'History',
+                    tabBarIcon: ({ color }) => <TabBarIcon name="calendar" color={color} />,
                 }}
             />
         </Tabs>
