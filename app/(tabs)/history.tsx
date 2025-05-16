@@ -5,15 +5,24 @@ import {
     FlatList,
     Image,
     StyleSheet,
+    TouchableOpacity,
+    Modal,
+    Share,
+    Button,
+    Platform,
 } from 'react-native';
+import * as MediaLibrary from 'expo-media-library';
+import * as FileSystem from 'expo-file-system';
 import { useGroupedImages } from '@/hooks/useGroupedImages';
 import CalendarGrid from '@/components/Calendar';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { useColors } from '@/constants/Colors';
-
+import { Ionicons } from '@expo/vector-icons';
 
 const HistoryScreen = () => {
     const [selectedDate, setSelectedDate] = useState(new Date());
+    const [modalVisible, setModalVisible] = useState(false);
+    const [selectedImageUri, setSelectedImageUri] = useState<string | null>(null);
 
     const { groupedImages, refresh } = useGroupedImages();
     const { backgroundPrimary } = useColors();
@@ -22,9 +31,39 @@ const HistoryScreen = () => {
         refresh();
     }, []);
 
-
-
     const selectedImages = groupedImages[selectedDate.toDateString()] || [];
+
+    const handleImagePress = (uri: string) => {
+        setSelectedImageUri(uri);
+        setModalVisible(true);
+    };
+
+    const handleDownload = async () => {
+        if (!selectedImageUri) return;
+
+        try {
+            const fileUri = FileSystem.documentDirectory || '' + selectedImageUri.split('/').pop();
+            await FileSystem.downloadAsync(selectedImageUri, fileUri);
+            const { status } = await MediaLibrary.requestPermissionsAsync();
+            if (status === 'granted') {
+                await MediaLibrary.saveToLibraryAsync(fileUri);
+                alert('Image saved to gallery!');
+            }
+        } catch (error) {
+            console.error('Download error:', error);
+            alert('Failed to save image');
+        }
+    };
+
+    const handleShare = async () => {
+        if (selectedImageUri) {
+            try {
+                await Share.share({ url: selectedImageUri });
+            } catch (error) {
+                alert('Failed to share image');
+            }
+        }
+    };
 
     return (
         <ParallaxScrollView
@@ -39,19 +78,48 @@ const HistoryScreen = () => {
             headerHeight={450}
         >
             <View style={styles.container}>
-
-                <Text style={styles.dateLabel}>{selectedDate.toDateString()}</Text>
+                <Text style={styles.dateLabel}>
+                    {selectedDate.toLocaleDateString('en-US', {
+                        weekday: 'long',
+                        month: 'long',
+                        day: 'numeric',
+                        year: 'numeric',
+                    })}
+                </Text>
 
                 <FlatList
                     data={selectedImages}
                     horizontal
                     keyExtractor={(_, i) => i.toString()}
                     renderItem={({ item }) => (
-                        <Image source={{ uri: item.uri }} style={styles.previewImage} />
+                        <TouchableOpacity
+                            onPress={() => handleImagePress(item.uri)}
+                        >
+                            <Image source={{ uri: item.uri }} style={styles.previewImage} />
+                        </TouchableOpacity>
                     )}
                     contentContainerStyle={styles.imageRow}
                     showsHorizontalScrollIndicator={false}
                 />
+
+                <Modal visible={modalVisible} transparent animationType="fade">
+                    <TouchableOpacity style={styles.closeButton} onPress={() => setModalVisible(false)}>
+                        <Ionicons name="chevron-back" size={24} color="#fff" />
+
+                    </TouchableOpacity>
+                    <View style={styles.modalOverlay}>
+                        <Image source={{ uri: selectedImageUri || '' }} style={styles.fullImage} />
+                        <View style={styles.iconButtonRow}>
+                            <TouchableOpacity style={styles.iconButton} onPress={handleShare}>
+                                <Ionicons name="share-social-outline" size={26} color="#fff" />
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.iconButton} onPress={handleDownload}>
+                                <Ionicons name="download-outline" size={26} color="#fff" />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Modal>
+
             </View>
         </ParallaxScrollView>
     );
@@ -62,27 +130,62 @@ export default HistoryScreen;
 const styles = StyleSheet.create({
     container: {
         alignItems: 'center',
-        padding: 18,
+        padding: 14,
     },
-    title: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        marginBottom: 8,
-    },
-
     dateLabel: {
-        fontSize: 16,
+        fontSize: 20,
         fontWeight: '600',
-        marginBottom: 10,
+        marginBottom: 16,
         alignSelf: 'flex-start',
     },
     imageRow: {
+        width: '100%',
         paddingBottom: 20,
     },
     previewImage: {
-        width: 120,
-        height: 180,
+        width: 140,
+        height: 200,
         borderRadius: 10,
         marginRight: 12,
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.9)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 8
+    },
+    fullImage: {
+        width: '100%',
+        height: '70%',
+        resizeMode: 'contain',
+        borderRadius: 12,
+        marginBottom: 20,
+    },
+    iconButtonRow: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        marginTop: 16,
+    },
+    iconButton: {
+        marginHorizontal: 20,
+        backgroundColor: 'rgba(255,255,255,0.1)',
+        borderRadius: 50,
+        height: 50,
+        width: 50,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    closeButton: {
+        position: 'absolute',
+        top: 50,
+        left: 20,
+        backgroundColor: 'rgba(255,255,255,0.1)',
+        borderRadius: 50,
+        zIndex: 1,
+        height: 40,
+        width: 40,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
 });
