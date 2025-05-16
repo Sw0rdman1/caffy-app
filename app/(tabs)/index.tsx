@@ -67,7 +67,6 @@ const styles = StyleSheet.create({
         padding: 24,
         alignItems: 'center',
         paddingTop: 40,
-        height: height - HEADER_HEIGHT,
     },
     title: {
         textAlign: 'center',
