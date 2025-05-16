@@ -2,7 +2,7 @@ import { Image, StyleSheet } from 'react-native'
 import { Text, View } from './Themed'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-const HeaderComponent = () => {
+const HomeHeaderComponent = () => {
     const { top } = useSafeAreaInsets()
 
     return (
@@ -16,13 +16,28 @@ const HeaderComponent = () => {
     )
 }
 
-export default HeaderComponent
+const HistoryHeaderComponent = () => {
+    const { top } = useSafeAreaInsets()
+
+    return (
+        <View style={{ ...styles.historyContainer, paddingTop: top - 10 }}>
+            <Text style={styles.title}>Your Coffe Journey</Text>
+        </View>
+    )
+}
+
+export { HomeHeaderComponent, HistoryHeaderComponent }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'center',
         flexDirection: 'row'
+    },
+    historyContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     title: {
         fontSize: 30,

@@ -1,4 +1,3 @@
-import HeaderComponent from '@/components/HeaderComponent';
 import ParallaxScrollView, { HEADER_HEIGHT } from '@/components/ParallaxScrollView';
 import { Text } from '@/components/Themed';
 import { useColors } from '@/constants/Colors';
@@ -8,6 +7,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { getCameraPermissionsAsync } from '@/utils/camera';
 import { router } from 'expo-router';
 import { useAppContext } from '@/context/AppContext';
+import { HomeHeaderComponent } from '@/components/HeaderComponent';
 
 const { height } = Dimensions.get('window');
 
@@ -35,7 +35,7 @@ export default function HomeScreen() {
     return (
         <ParallaxScrollView
             headerBackgroundColor={{ light: backgroundPrimary, dark: backgroundPrimary }}
-            headerComponent={<HeaderComponent />}
+            headerComponent={<HomeHeaderComponent />}
         >
             <View style={[styles.contentContainer, { backgroundColor: backgroundSecondary }]}>
                 <Text style={styles.title}>

@@ -34,6 +34,7 @@ export default function TabLayout() {
             <Tabs.Screen
                 name="history"
                 options={{
+                    headerShown: false,
                     title: 'History',
                     tabBarIcon: ({ color }) => <TabBarIcon name="calendar" color={color} />,
                 }}

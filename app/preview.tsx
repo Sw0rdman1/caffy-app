@@ -2,8 +2,12 @@ import { ActivityIndicator, Image, StyleSheet, Text, View } from 'react-native';
 import { useAppContext } from '@/context/AppContext';
 import { useEffect, useState } from 'react';
 import { checkImageForCoffee } from '@/utils/checkImageForCoffe';
-import { Ionicons } from '@expo/vector-icons';
 import { useColors } from '@/constants/Colors';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as FileSystem from 'expo-file-system';
+import { TouchableOpacity } from 'react-native';
+
+
 
 const PreviewScreen = () => {
     const { imageUri } = useAppContext();
@@ -20,6 +24,41 @@ const PreviewScreen = () => {
 
         checkImage();
     }, [imageUri]);
+
+    const saveImageToStorage = async () => {
+        if (!imageUri) return;
+
+        try {
+            const fileName = imageUri.split('/').pop();
+            const newPath = FileSystem.documentDirectory + 'saved/' + fileName;
+
+            // Ensure directory exists
+            await FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'saved', { intermediates: true });
+
+            // Move the image to permanent location
+            await FileSystem.moveAsync({ from: imageUri, to: newPath });
+
+            // Get current saved items
+            const json = await AsyncStorage.getItem('savedImages');
+            const savedImages = json ? JSON.parse(json) : [];
+
+            // Add new entry
+            const newEntry = {
+                uri: newPath,
+                timestamp: new Date().toISOString()
+            };
+
+            savedImages.push(newEntry);
+            await AsyncStorage.setItem('savedImages', JSON.stringify(savedImages));
+
+            alert('Image and timestamp saved!');
+        } catch (err) {
+            console.error('Error saving image:', err);
+            alert('Failed to save image.');
+        }
+    };
+
+
 
     return (
         <View style={{ flex: 1, backgroundColor: backgroundSecondary }}>
@@ -42,6 +81,9 @@ const PreviewScreen = () => {
                         <Text style={styles.subtext}>Try snapping your cup again!</Text>
                     </View>
                 )}
+                <TouchableOpacity onPress={saveImageToStorage} style={styles.saveButton}>
+                    <Text style={styles.saveButtonText}>💾 Save This Shot</Text>
+                </TouchableOpacity>
             </View>
         </View>
     );
@@ -92,5 +134,18 @@ const styles = StyleSheet.create({
         fontSize: 16,
         marginTop: 6,
         color: '#777',
+    },
+    saveButton: {
+        marginTop: 20,
+        backgroundColor: '#6a4e3b',
+        paddingVertical: 12,
+        paddingHorizontal: 24,
+        borderRadius: 12,
+    },
+
+    saveButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
     },
 });
