@@ -4,17 +4,11 @@ import {
     Text,
     FlatList,
     Image,
-    TouchableOpacity,
     StyleSheet,
-    Dimensions,
-    ScrollView,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getMonthMatrix, getMonthName } from '@/utils/calendarUtils';
 import { useGroupedImages } from '@/hooks/useGroupedImages';
 import CalendarGrid from '@/components/Calendar';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { HistoryHeaderComponent, HomeHeaderComponent } from '@/components/HeaderComponent';
 import { useColors } from '@/constants/Colors';
 
 
@@ -35,17 +29,16 @@ const HistoryScreen = () => {
     return (
         <ParallaxScrollView
             headerBackgroundColor={{ light: backgroundPrimary, dark: backgroundPrimary }}
-            headerComponent={<HistoryHeaderComponent />}
-            headerHeight={150}
-        >
-            <View style={styles.container}>
-
-
+            headerComponent={
                 <CalendarGrid
                     selectedDate={selectedDate}
                     onSelectDate={setSelectedDate}
                     groupedImages={groupedImages}
                 />
+            }
+            headerHeight={450}
+        >
+            <View style={styles.container}>
 
                 <Text style={styles.dateLabel}>{selectedDate.toDateString()}</Text>
 
