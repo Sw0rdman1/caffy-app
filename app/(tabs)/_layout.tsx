@@ -31,12 +31,21 @@ export default function TabLayout() {
                     tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
                 }}
             />
+
             <Tabs.Screen
                 name="history"
                 options={{
                     headerShown: false,
                     title: 'History',
                     tabBarIcon: ({ color }) => <TabBarIcon name="calendar" color={color} />,
+                }}
+            />
+            <Tabs.Screen
+                name="statistic"
+                options={{
+                    headerShown: false,
+                    title: 'Your Stats',
+                    tabBarIcon: ({ color }) => <TabBarIcon name="stats-chart" color={color} />,
                 }}
             />
         </Tabs>

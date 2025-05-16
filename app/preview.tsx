@@ -6,6 +6,7 @@ import { useColors } from '@/constants/Colors';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as FileSystem from 'expo-file-system';
 import { TouchableOpacity } from 'react-native';
+import { router } from 'expo-router';
 
 
 
@@ -32,13 +33,10 @@ const PreviewScreen = () => {
             const fileName = imageUri.split('/').pop();
             const newPath = FileSystem.documentDirectory + 'saved/' + fileName;
 
-            // Ensure directory exists
             await FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'saved', { intermediates: true });
 
-            // Move the image to permanent location
             await FileSystem.moveAsync({ from: imageUri, to: newPath });
 
-            // Get current saved items
             const json = await AsyncStorage.getItem('savedImages');
             const savedImages = json ? JSON.parse(json) : [];
 
@@ -50,6 +48,8 @@ const PreviewScreen = () => {
 
             savedImages.push(newEntry);
             await AsyncStorage.setItem('savedImages', JSON.stringify(savedImages));
+
+            router.push('/history');
 
             alert('Image and timestamp saved!');
         } catch (err) {
@@ -81,9 +81,11 @@ const PreviewScreen = () => {
                         <Text style={styles.subtext}>Try snapping your cup again!</Text>
                     </View>
                 )}
-                <TouchableOpacity onPress={saveImageToStorage} style={styles.saveButton}>
-                    <Text style={styles.saveButtonText}>💾 Save This Shot</Text>
-                </TouchableOpacity>
+                {isCoffeeImage &&
+                    <TouchableOpacity onPress={saveImageToStorage} style={styles.saveButton}>
+                        <Text style={styles.saveButtonText}>💾 Save This Shot</Text>
+                    </TouchableOpacity>
+                }
             </View>
         </View>
     );

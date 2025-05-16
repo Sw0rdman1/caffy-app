@@ -26,7 +26,17 @@ const HistoryHeaderComponent = () => {
     )
 }
 
-export { HomeHeaderComponent, HistoryHeaderComponent }
+const StatisticHeaderComponent = () => {
+    const { top } = useSafeAreaInsets()
+
+    return (
+        <View style={{ ...styles.historyContainer, paddingTop: top - 10 }}>
+            <Text style={styles.title}>Your Coffe Stats</Text>
+        </View>
+    )
+}
+
+export { HomeHeaderComponent, HistoryHeaderComponent, StatisticHeaderComponent }
 
 const styles = StyleSheet.create({
     container: {
@@ -40,7 +50,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     title: {
-        fontSize: 30,
+        fontSize: 36,
         fontWeight: 'bold',
     },
     logo: {
