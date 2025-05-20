@@ -1,21 +1,17 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
     Image,
     StyleSheet,
     Text,
-    TextInput,
     TouchableOpacity,
     View,
 } from 'react-native';
 import { useAppContext } from '@/context/AppContext';
 import { checkImageForCoffee } from '@/utils/checkImageForCoffe';
 import { useColors } from '@/constants/Colors';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as FileSystem from 'expo-file-system';
 import { router } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { Ionicons } from '@expo/vector-icons';
 import { useToast } from '@/context/ToastContext';
 import LocationInput from '@/components/LocationInput';
 import CoffeErrorRecognition from '@/components/CoffeErrorRecognition';
@@ -27,7 +23,7 @@ const PreviewScreen = () => {
     const [loading, setLoading] = useState(true);
     const [isCoffeeImage, setIsCoffeeImage] = useState(false);
     const [location, setLocation] = useState('');
-    const { showToast } = useToast();
+    const { showToast, displayConfetti } = useToast();
     const { backgroundSecondary, highlight } = useColors();
 
     useEffect(() => {
@@ -38,10 +34,8 @@ const PreviewScreen = () => {
 
             if (isCoffee) {
                 await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                showToast('Coffee detected! Looks great!', 'success');
             } else {
                 await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-                showToast('No coffee detected.', 'error');
             }
         };
 
@@ -49,9 +43,10 @@ const PreviewScreen = () => {
     }, [imageUri]);
 
     const onSaveImageSuccess = () => {
+        router.push('/history');
         showToast('Image saved successfully!', 'success');
-        router.back();
-    }
+        displayConfetti();
+    };
 
     const saveImageToStorageHandler = async () => {
         await saveImageToStorage(
@@ -61,6 +56,32 @@ const PreviewScreen = () => {
         );
     };
 
+    const renderContent = () => {
+        if (loading) {
+            return (
+                <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color="#8B4513" />
+                    <Text style={styles.loadingText}>Analyzing your coffee shot…</Text>
+                </View>
+            );
+        }
+
+        if (isCoffeeImage) {
+            return (
+                <>
+                    <LocationInput location={location} setLocation={setLocation} />
+                    <TouchableOpacity onPress={saveImageToStorageHandler} style={[styles.saveButton, { backgroundColor: highlight }]}>
+                        <Text style={styles.saveButtonText}>💾 Save This Shot</Text>
+                    </TouchableOpacity>
+                </>
+            );
+        }
+
+        return (
+            <CoffeErrorRecognition />
+        );
+    }
+
 
 
     return (
@@ -68,23 +89,9 @@ const PreviewScreen = () => {
             <BackButton />
             <Image source={{ uri: imageUri || '' }} style={styles.image} resizeMode="cover" />
             <View style={styles.resultContainer}>
-                {loading ? (
-                    <>
-                        <ActivityIndicator size="large" color="#8B4513" />
-                        <Text style={styles.loadingText}>Analyzing your coffee shot…</Text>
-                    </>
-                ) : isCoffeeImage ? (
-                    <>
-                        <LocationInput location={location} setLocation={setLocation} />
-
-                        <TouchableOpacity onPress={saveImageToStorageHandler} style={[styles.saveButton, { backgroundColor: highlight }]}>
-                            <Text style={styles.saveButtonText}>💾 Save This Shot</Text>
-                        </TouchableOpacity>
-                    </>
-                ) : (
-                    <CoffeErrorRecognition />
-                )}
+                {renderContent()}
             </View>
+
         </View>
     );
 };
@@ -103,6 +110,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: 24,
         paddingTop: 30,
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     loadingText: {
         marginTop: 16,

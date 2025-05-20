@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
         alignSelf: 'flex-start',
     },
     imageRow: {
-        width: '100%',
+        minWidth: '100%',
         paddingBottom: 20,
     },
     previewImage: {

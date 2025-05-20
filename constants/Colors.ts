@@ -65,3 +65,8 @@ export const useColors = () => {
   const colorScheme = useColorScheme() ?? 'light';
   return CaffyColors[colorScheme];
 }
+
+export const isDarkTheme = () => {
+  const colorScheme = useColorScheme();
+  return colorScheme === 'dark';
+}

@@ -1,16 +1,25 @@
-import { Image, StyleSheet } from 'react-native'
+import { StyleSheet } from 'react-native'
 import { Text, View } from './Themed'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { Image } from 'expo-image'
+import { isDarkTheme } from '@/constants/Colors'
 
 const HomeHeaderComponent = () => {
     const { top } = useSafeAreaInsets()
+    const darkTheme = isDarkTheme()
+
 
     return (
         <View style={{ ...styles.container, paddingTop: top - 10 }}>
             <Image
-                source={require('../assets/images/logo_transparent.png')}
+                source={darkTheme ?
+                    require('../assets/images/logo_transparent_dark.png') :
+                    require('../assets/images/logo_transparent_light.png')
+                }
                 style={styles.logo}
-                resizeMode="contain"
+                contentFit="contain"
+                transition={1000}
+                cachePolicy='memory-disk'
             />
         </View>
     )

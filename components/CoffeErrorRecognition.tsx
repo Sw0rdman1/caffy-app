@@ -9,7 +9,7 @@ const CoffeErrorRecognition = () => {
         <View style={[styles.failBox, { backgroundColor: error.surface }]}>
             <Text style={styles.failEmoji}>😞</Text>
             <Text style={[styles.resultText, { color: error.text }]}>No coffee detected</Text>
-            <Text style={styles.subtext}>Try again and make sure your cup is clearly visible!</Text>
+            <Text style={[styles.subtext, { color: error.text }]}>Try again and make sure your cup is clearly visible!</Text>
             <TouchableOpacity onPress={() => router.back()} style={[styles.retryButton]}>
                 <Text style={styles.retryText}>🔁 Retry</Text>
             </TouchableOpacity>

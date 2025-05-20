@@ -1,8 +1,8 @@
-import ParallaxScrollView, { HEADER_HEIGHT } from '@/components/ParallaxScrollView';
+import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { Text } from '@/components/Themed';
 import { useColors } from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
-import { Alert, Dimensions, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Dimensions, StyleSheet, TouchableOpacity, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { getCameraPermissionsAsync } from '@/utils/camera';
 import { router } from 'expo-router';

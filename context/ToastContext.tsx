@@ -8,11 +8,13 @@ import {
     StyleProp,
     ViewStyle,
 } from 'react-native';
+import ConfettiCannon from 'react-native-confetti-cannon';
 
 type ToastType = 'success' | 'error' | 'info';
 
 type ToastContextType = {
     showToast: (message: string, type?: ToastType) => void;
+    displayConfetti: () => void;
 };
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
@@ -21,9 +23,18 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const [message, setMessage] = useState('');
     const [type, setType] = useState<ToastType>('info');
     const [visible, setVisible] = useState(false);
+    const [showConfetti, setShowConfetti] = useState(false);
 
     const opacity = useRef(new Animated.Value(0)).current;
     const translateY = useRef(new Animated.Value(-30)).current;
+
+
+    const displayConfetti = (duration: number = 2000) => {
+        setShowConfetti(true);
+        setTimeout(() => {
+            setShowConfetti(false);
+        }, duration);
+    };
 
     const showToast = (msg: string, toastType: ToastType = 'info') => {
         setMessage(msg);
@@ -89,7 +100,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
 
     return (
-        <ToastContext.Provider value={{ showToast }}>
+        <ToastContext.Provider value={{ showToast, displayConfetti }}>
             {children}
             {visible && (
                 <Animated.View
@@ -103,6 +114,15 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                         {getEmoji()} {message}
                     </Text>
                 </Animated.View>
+            )}
+            {showConfetti && (
+                <ConfettiCannon
+                    count={60}
+                    origin={{ x: 200, y: 0 }}
+                    fadeOut
+                    explosionSpeed={350}
+                    fallSpeed={1500}
+                />
             )}
         </ToastContext.Provider>
     );
