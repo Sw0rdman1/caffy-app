@@ -1,26 +1,29 @@
+import React, { useEffect, useRef, useState } from 'react';
 import {
     ActivityIndicator,
     Image,
     StyleSheet,
     Text,
     TextInput,
-    View,
     TouchableOpacity,
-    KeyboardAvoidingView
+    View,
 } from 'react-native';
 import { useAppContext } from '@/context/AppContext';
-import { useEffect, useState } from 'react';
 import { checkImageForCoffee } from '@/utils/checkImageForCoffe';
 import { useColors } from '@/constants/Colors';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as FileSystem from 'expo-file-system';
 import { router } from 'expo-router';
+import * as Haptics from 'expo-haptics';
+import { Ionicons } from '@expo/vector-icons';
+import { useToast } from '@/context/ToastContext';
 
 const PreviewScreen = () => {
     const { imageUri } = useAppContext();
     const [loading, setLoading] = useState(true);
     const [isCoffeeImage, setIsCoffeeImage] = useState(false);
     const [location, setLocation] = useState('');
+    const { showToast } = useToast();
     const { backgroundSecondary } = useColors();
 
     useEffect(() => {
@@ -28,6 +31,14 @@ const PreviewScreen = () => {
             const isCoffee = await checkImageForCoffee(imageUri || '');
             setIsCoffeeImage(isCoffee);
             setLoading(false);
+
+            if (isCoffee) {
+                await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                showToast('Coffee detected! Looks great!', 'success');
+            } else {
+                await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+                showToast('No coffee detected.', 'error');
+            }
         };
 
         checkImage();
@@ -49,27 +60,32 @@ const PreviewScreen = () => {
             const newEntry = {
                 uri: newPath,
                 timestamp: new Date().toISOString(),
-                location: location.trim()
+                location: location.trim(),
             };
 
             savedImages.push(newEntry);
             await AsyncStorage.setItem('savedImages', JSON.stringify(savedImages));
 
             router.push('/history');
-            alert('Image and location saved!');
+            showToast('Image and location saved!', 'success');
         } catch (err) {
             console.error('Error saving image:', err);
-            alert('Failed to save image.');
+            showToast('Failed to save image.', 'error');
         }
     };
 
     return (
-        <KeyboardAvoidingView
-            style={{ flex: 1, backgroundColor: backgroundSecondary }}
-            behavior="padding"
-            enabled
-        >
+        <View style={{ flex: 1, backgroundColor: backgroundSecondary }}>
             <Image source={{ uri: imageUri || '' }} style={styles.image} resizeMode="cover" />
+
+            {/* Back Button */}
+            <TouchableOpacity
+                onPress={() => router.back()}
+                style={styles.backButton}
+            >
+                <Ionicons name="arrow-back" size={28} color="#fff" />
+            </TouchableOpacity>
+
             <View style={styles.resultContainer}>
                 {loading ? (
                     <>
@@ -85,10 +101,6 @@ const PreviewScreen = () => {
                             onChangeText={setLocation}
                             placeholderTextColor="#999"
                         />
-                        <View style={styles.successBox}>
-                            <Text style={styles.resultText}>Coffe detected! ☕</Text>
-                            <Text style={styles.subtext}>That brew looks amazing. Post it!</Text>
-                        </View>
 
                         <TouchableOpacity onPress={saveImageToStorage} style={styles.saveButton}>
                             <Text style={styles.saveButtonText}>💾 Save This Shot</Text>
@@ -96,12 +108,16 @@ const PreviewScreen = () => {
                     </>
                 ) : (
                     <View style={styles.failBox}>
-                        <Text style={styles.resultText}>No coffee detected 🚫</Text>
-                        <Text style={styles.subtext}>Try snapping your cup again!</Text>
+                        <Text style={styles.failEmoji}>😞</Text>
+                        <Text style={styles.resultText}>No coffee detected</Text>
+                        <Text style={styles.subtext}>Try again and make sure your cup is clearly visible!</Text>
+                        <TouchableOpacity onPress={() => router.back()} style={styles.retryButton}>
+                            <Text style={styles.retryText}>🔁 Retry</Text>
+                        </TouchableOpacity>
                     </View>
                 )}
             </View>
-        </KeyboardAvoidingView>
+        </View>
     );
 };
 
@@ -118,25 +134,22 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         paddingHorizontal: 24,
-        gap: 12,
+        marginTop: 20,
     },
     loadingText: {
         marginTop: 16,
         fontSize: 16,
         color: '#555',
     },
-    successBox: {
-        alignItems: 'center',
-        padding: 24,
-        backgroundColor: '#f1e4d1',
-        borderRadius: 16,
-        marginBottom: 12,
-    },
     failBox: {
         alignItems: 'center',
         padding: 24,
         backgroundColor: '#ffe5e5',
         borderRadius: 16,
+    },
+    failEmoji: {
+        fontSize: 44,
+        marginBottom: 10,
     },
     resultText: {
         fontSize: 22,
@@ -147,6 +160,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         marginTop: 6,
         color: '#777',
+        textAlign: 'center',
     },
     input: {
         width: '100%',
@@ -155,7 +169,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         padding: 12,
         marginTop: 10,
-        fontSize: 16,
+        fontSize: 20,
         color: '#333',
         backgroundColor: '#fff',
     },
@@ -170,5 +184,26 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 16,
         fontWeight: 'bold',
+    },
+    retryButton: {
+        marginTop: 16,
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        backgroundColor: '#d24d57',
+        borderRadius: 10,
+    },
+    retryText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    backButton: {
+        position: 'absolute',
+        top: 40,
+        left: 20,
+        zIndex: 10,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        borderRadius: 30,
+        padding: 8,
     },
 });
